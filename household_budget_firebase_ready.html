@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>家庭帳目</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#f7f6f2;color:#1a1916;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;min-height:100vh;}
+:root{--bg:#f7f6f2;--sf:#fff;--sf2:#f0efe9;--bd:rgba(0,0,0,.1);--bd2:rgba(0,0,0,.18);--tx:#1a1916;--tx2:#6b6a65;--tx3:#a09f9a;--inc:#1D9E75;--exp:#D85A30;--blue:#185FA5;--blu2:#E6F1FB;--grn2:#EAF3DE;--rad:10px;--radl:16px;}
+@media(prefers-color-scheme:dark){:root{--bg:#18181b;--sf:#27272a;--sf2:#3f3f46;--bd:rgba(255,255,255,.1);--bd2:rgba(255,255,255,.2);--tx:#fafaf9;--tx2:#a1a1aa;--tx3:#71717a;--blu2:#1e3a5f;--grn2:#14532d;}}
+.app{max-width:440px;margin:0 auto;padding:1.25rem 1rem 4rem;}
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;}
+.hdr h1{font-size:20px;font-weight:700;color:var(--tx);}
+.mnv{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--tx2);}
+.mnv button{background:none;border:none;cursor:pointer;color:var(--tx2);font-size:18px;line-height:1;}
+.sgd{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1rem;}
+.sc{background:var(--sf);border:.5px solid var(--bd);border-radius:var(--rad);padding:.85rem .9rem;}
+.lb{font-size:11px;color:var(--tx3);margin-bottom:5px;font-weight:500;}
+.am{font-size:16px;font-weight:700;}
+.gi{color:var(--inc);}.ge{color:var(--exp);}
+.sti{font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.tabs{display:flex;background:var(--sf2);border-radius:var(--rad);padding:3px;gap:3px;margin-bottom:1rem;}
+.tab{flex:1;padding:7px 4px;font-size:12px;font-weight:500;text-align:center;cursor:pointer;color:var(--tx2);background:none;border:none;border-radius:8px;}
+.tab.active{background:var(--sf);color:var(--tx);box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.sbr{position:relative;margin-bottom:1rem;}
+.sbr input{width:100%;padding:9px 34px;background:var(--sf);border:.5px solid var(--bd);border-radius:var(--rad);font-size:14px;color:var(--tx);}
+.sbr input::placeholder{color:var(--tx3);}
+.sic{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none;}
+.scl{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--tx3);cursor:pointer;display:none;}
+.dg{margin-bottom:.25rem;}
+.dl{font-size:11px;font-weight:600;color:var(--tx3);padding:6px 2px 4px;border-bottom:.5px solid var(--bd);margin-bottom:2px;}
+.tx{display:flex;align-items:flex-start;gap:10px;padding:9px 8px;border-radius:var(--rad);cursor:pointer;}
+.tx:hover{background:var(--sf2);}
+.txi{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;margin-top:1px;}
+.txi2{flex:1;min-width:0;}
+.txn{font-size:14px;color:var(--tx);margin-bottom:3px;font-weight:500;}
+.txg{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:3px;}
+.tgm{font-size:11px;padding:2px 9px;border-radius:20px;background:var(--blu2);color:var(--blue);font-weight:500;}
+.tgs{font-size:11px;padding:2px 9px;border-radius:20px;background:var(--grn2);color:#3B6D11;font-weight:500;}
+.txm{font-size:11px;color:var(--tx3);}
+.txr{text-align:right;flex-shrink:0;}
+.txa{font-size:14px;font-weight:700;}
+.txp{font-size:11px;color:var(--tx3);margin-top:2px;}
+.sbdg{display:inline-block;font-size:10px;background:var(--blu2);color:var(--blue);border-radius:5px;padding:1px 6px;font-weight:500;}
+.emp{text-align:center;padding:2.5rem 0;color:var(--tx3);font-size:14px;}
+.adb{width:100%;padding:13px;border:.5px solid var(--bd2);border-radius:var(--radl);background:var(--sf);font-size:14px;font-weight:500;color:var(--tx);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:1rem;}
+.adb:hover{background:var(--sf2);}
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:10;align-items:flex-end;justify-content:center;}
+.mbg.open{display:flex;}
+.mdl{background:var(--sf);border-radius:var(--radl) var(--radl) 0 0;padding:1.5rem 1.25rem;width:100%;max-width:440px;border:.5px solid var(--bd);max-height:92vh;overflow-y:auto;}
+.mdl h2{font-size:17px;font-weight:700;margin-bottom:1.1rem;color:var(--tx);}
+.fl{margin-bottom:.8rem;}
+.fl label{font-size:12px;color:var(--tx2);display:block;margin-bottom:5px;font-weight:500;}
+.fl input,.fl select{width:100%;padding:9px 12px;background:var(--sf2);border:.5px solid var(--bd);border-radius:var(--rad);font-size:14px;color:var(--tx);}
+.fl input:focus,.fl select:focus{outline:none;border-color:var(--bd2);}
+.fl textarea{width:100%;resize:vertical;min-height:56px;padding:9px 12px;font-size:14px;background:var(--sf2);border:.5px solid var(--bd);border-radius:var(--rad);color:var(--tx);font-family:inherit;}
+.fl textarea:focus{outline:none;border-color:var(--bd2);}
+.ma{display:flex;gap:8px;margin-top:1.1rem;}
+.ma button{flex:1;padding:11px;border-radius:var(--rad);font-size:14px;font-weight:500;cursor:pointer;}
+.bcn{background:none;border:.5px solid var(--bd2);color:var(--tx2);}
+.bsv{background:var(--blue);border:none;color:white;}
+.bde{background:var(--exp);border:none;color:white;}
+.ttg{display:flex;background:var(--sf2);border-radius:var(--rad);padding:3px;gap:3px;}
+.tb{flex:1;padding:8px;font-size:13px;font-weight:500;text-align:center;cursor:pointer;border:none;background:none;border-radius:8px;color:var(--tx2);}
+.tb.ai{background:#E1F5EE;color:#0F6E56;}
+.tb.ae{background:#FAECE7;color:#993C1D;}
+.spo{display:flex;gap:6px;margin-top:4px;}
+.so{flex:1;padding:7px 4px;border:.5px solid var(--bd);border-radius:var(--rad);font-size:12px;font-weight:500;text-align:center;cursor:pointer;color:var(--tx2);background:var(--sf);}
+.so.active{border-color:var(--blue);color:var(--blue);background:var(--blu2);}
+.sdt{background:var(--sf2);border-radius:var(--rad);padding:.85rem;margin-top:6px;}
+.srw{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.srw:last-child{margin-bottom:0;}
+.snm{font-size:13px;color:var(--tx);width:38px;flex-shrink:0;font-weight:500;}
+.shi{font-size:11px;color:var(--tx3);margin-top:5px;}
+.pgd{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pbl{background:var(--sf2);border-radius:var(--rad);padding:.65rem .85rem;}
+.pb1{font-size:11px;color:var(--tx3);margin-bottom:4px;}
+.pb2{font-size:15px;font-weight:700;color:var(--tx);}
+.cel{font-size:12px;color:var(--blue);cursor:pointer;margin-left:6px;text-decoration:underline;}
+.cse{margin-bottom:.85rem;}
+.cli{display:flex;align-items:center;justify-content:space-between;padding:8px 4px;border-bottom:.5px solid var(--bd);}
+.cli:last-child{border-bottom:none;}
+.cll{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--tx);}
+.cdl{background:none;border:none;color:var(--exp);font-size:18px;cursor:pointer;}
+.sbl{margin-left:28px;}
+.sbi{display:flex;align-items:center;justify-content:space-between;padding:6px 4px;border-bottom:.5px solid var(--bd);}
+.sbi:last-child{border-bottom:none;}
+.sbd{background:none;border:none;color:var(--tx3);font-size:14px;cursor:pointer;}
+.car{display:flex;gap:6px;margin-top:8px;}
+.car input{flex:1;padding:8px 10px;background:var(--sf2);border:.5px solid var(--bd);border-radius:var(--rad);font-size:13px;color:var(--tx);}
+.cab{padding:8px 14px;background:var(--blue);color:white;border:none;border-radius:var(--rad);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;}
+.ipk{display:flex;flex-wrap:wrap;gap:4px;background:var(--sf2);border-radius:var(--rad);padding:8px;margin-top:6px;}
+.iop{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:19px;border-radius:var(--rad);cursor:pointer;border:2px solid transparent;}
+.iop:hover{background:var(--sf);}
+.iop.isel{border-color:var(--blue);background:var(--blu2);}
+.mcd{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:.5px solid var(--bd);}
+.mcd:last-child{border-bottom:none;}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.mrw{display:flex;align-items:center;gap:8px;}
+.stb{padding:5px 11px;font-size:12px;font-weight:500;border:.5px solid var(--bd2);border-radius:var(--rad);background:var(--sf);color:var(--tx);cursor:pointer;}
+.stb:hover{background:var(--sf2);}
+.stn{font-size:12px;color:var(--inc);padding:4px 10px;background:#E1F5EE;border-radius:var(--rad);font-weight:500;}
+.slg{font-size:12px;color:var(--tx2);padding:7px 0;border-bottom:.5px solid var(--bd);display:flex;justify-content:space-between;align-items:center;gap:6px;}
+.slg:last-child{border-bottom:none;}
+.sud{background:none;border:none;font-size:11px;color:var(--tx3);cursor:pointer;text-decoration:underline;}
+.ctb{margin-top:1rem;padding:.9rem 1rem;background:var(--sf);border:.5px solid var(--bd);border-radius:var(--radl);}
+.ctt{font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+.crw{display:flex;align-items:center;margin-bottom:8px;}
+.cnm{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--tx);width:60px;flex-shrink:0;}
+.cbr{flex:1;margin:0 10px;height:7px;background:var(--sf2);border-radius:4px;overflow:hidden;}
+.cbf{height:100%;border-radius:4px;}
+.cam{font-size:13px;font-weight:600;color:var(--tx);min-width:64px;text-align:right;}
+.mer{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.mer input{flex:1;padding:8px 10px;background:var(--sf2);border:.5px solid var(--bd);border-radius:var(--rad);font-size:14px;color:var(--tx);}
+.med{background:none;border:none;color:var(--exp);font-size:18px;cursor:pointer;}
+.bcr{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.bcl{font-size:12px;color:var(--tx2);width:60px;flex-shrink:0;}
+.btr{flex:1;height:8px;background:var(--sf2);border-radius:4px;overflow:hidden;}
+.bfi{height:100%;border-radius:4px;}
+.bca{font-size:12px;color:var(--tx);width:52px;text-align:right;flex-shrink:0;}
+mark{background:#FFF3CD;border-radius:2px;color:#1a1916;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr"><h1>家庭帳目</h1>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span id="syncstatus" style="font-size:11px;color:var(--tx3);min-width:64px;text-align:right;"></span>
+      <div class="mnv"><button>&#8249;</button><span>2026年4月</span><button>&#8250;</button></div>
+      <button id="expbtn" title="匯出備份" style="background:none;border:.5px solid var(--bd);border-radius:var(--rad);padding:4px 8px;font-size:12px;color:var(--tx2);cursor:pointer;">匯出</button>
+      <label id="impbtn" title="匯入備份" style="background:none;border:.5px solid var(--bd);border-radius:var(--rad);padding:4px 8px;font-size:12px;color:var(--tx2);cursor:pointer;">匯入<input type="file" accept=".json" style="display:none;" id="impfile"/></label>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" id="t0">總覽</button>
+    <button class="tab" id="t1">成員分帳</button>
+    <button class="tab" id="t2">報表</button>
+  </div>
+  <div id="tov">
+    <div class="sgd">
+      <div class="sc"><div class="lb">家庭收入</div><div class="am gi" id="si">$0</div></div>
+      <div class="sc"><div class="lb">支出</div><div class="am ge" id="se">$0</div></div>
+      <div class="sc"><div class="lb">家庭帳戶</div><div class="am" id="sb" style="color:var(--tx)">$0</div></div>
+    </div>
+    <div class="sbr"><span class="sic">🔍</span><input type="text" id="sq" placeholder="搜尋名稱或備註..."/><span class="scl" id="scl">✕</span></div>
+    <div id="txl"></div>
+    <button class="adb" id="addbtn">＋ 新增記錄</button>
+  </div>
+  <div id="tmb" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="sti" style="margin-bottom:0;">本月結算</div>
+      <button id="mgm" style="font-size:12px;padding:4px 10px;border:.5px solid var(--bd2);border-radius:var(--rad);background:none;cursor:pointer;color:var(--tx2);font-weight:500;">管理成員</button>
+    </div>
+    <div id="ml"></div>
+    <div id="ms" style="margin:10px 0;padding:.85rem 1rem;background:var(--sf);border:.5px solid var(--bd);border-radius:var(--radl);"></div>
+    <div class="ctb"><div class="ctt">家庭帳戶投入（來自收入記錄）</div><div id="cb"></div></div>
+    <div id="sls" style="display:none;margin-top:1rem;"><div class="sti">銷帳記錄</div><div id="sll"></div></div>
+  </div>
+  <div id="tch" style="display:none;">
+    <div class="sti" style="margin-bottom:10px;">近6個月支出趨勢</div>
+    <div style="display:flex;align-items:flex-end;gap:6px;height:120px;margin-bottom:1.25rem;">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div style="width:100%;height:55%;background:#185FA5;border-radius:4px 4px 0 0;"></div></div><span style="font-size:10px;color:var(--tx3);">11月</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div style="width:100%;height:72%;background:#185FA5;border-radius:4px 4px 0 0;"></div></div><span style="font-size:10px;color:var(--tx3);">12月</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div style="width:100%;height:60%;background:#185FA5;border-radius:4px 4px 0 0;"></div></div><span style="font-size:10px;color:var(--tx3);">1月</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div style="width:100%;height:65%;background:#185FA5;border-radius:4px 4px 0 0;"></div></div><span style="font-size:10px;color:var(--tx3);">2月</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div style="width:100%;height:78%;background:#185FA5;border-radius:4px 4px 0 0;"></div></div><span style="font-size:10px;color:var(--tx3);">3月</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div style="width:100%;height:85%;background:#D85A30;border-radius:4px 4px 0 0;"></div></div><span style="font-size:10px;color:var(--tx3);">4月</span></div>
+    </div>
+    <div class="sti">本月分類</div>
+    <div class="bcr"><span class="bcl">🛒 餐飲</span><div class="btr"><div class="bfi" style="width:72%;background:#1D9E75;"></div></div><span class="bca">$9,800</span></div>
+    <div class="bcr"><span class="bcl">🏠 居家</span><div class="btr"><div class="bfi" style="width:58%;background:#185FA5;"></div></div><span class="bca">$18,000</span></div>
+    <div class="bcr"><span class="bcl">🚗 交通</span><div class="btr"><div class="bfi" style="width:30%;background:#BA7517;"></div></div><span class="bca">$4,200</span></div>
+    <div class="bcr"><span class="bcl">🎬 娛樂</span><div class="btr"><div class="bfi" style="width:22%;background:#D4537E;"></div></div><span class="bca">$3,120</span></div>
+  </div>
+</div>
+
+<!-- Record Modal -->
+<div class="mbg" id="rm"><div class="mdl">
+  <h2 id="rmt">新增記錄</h2>
+  <div class="fl"><label>類型</label><div class="ttg"><button class="tb ae" id="bexp">支出</button><button class="tb" id="binc">收入</button></div></div>
+  <div class="fl"><label>日期</label><input type="date" id="fd"/></div>
+  <div class="fl"><label>名稱</label><input type="text" id="fn" placeholder="例：超市採購"/></div>
+  <div class="fl"><label>總金額（NTD）</label><input type="number" id="ft" placeholder="0"/></div>
+  <div class="fl"><label>類別 <span class="cel" id="clink">管理類別</span></label><select id="fc"></select></div>
+  <div class="fl" id="sff"><label>子類別</label><select id="fs"></select></div>
+  <div class="fl"><label>付款人</label><select id="fp"></select></div>
+  <div class="fl" id="spf"><label>分帳方式</label><div class="spo" id="spl"></div></div>
+  <div id="csp" style="display:none;margin-bottom:.75rem;"><div class="sdt"><div id="csr"></div><div class="shi" id="sh">輸入其中一位，另一位自動帶入剩餘金額</div></div></div>
+  <div class="fl" id="pdf"><label>付款金額分配</label><div class="pgd" id="pdg"></div></div>
+  <div class="fl"><label>備註（選填）</label><textarea id="fno" placeholder="補充說明..."></textarea></div>
+  <div class="ma" id="rma"></div>
+</div></div>
+
+<!-- Cat Modal -->
+<div class="mbg" id="cm2" style="z-index:20;"><div class="mdl">
+  <h2>管理類別</h2><div id="cl"></div>
+  <div class="ma"><button class="bsv" id="cdone">完成</button></div>
+</div></div>
+
+<!-- Icon Modal -->
+<div class="mbg" id="im2" style="z-index:30;"><div class="mdl" style="max-height:60vh;">
+  <h2>選擇圖示</h2><div class="ipk" id="ig"></div>
+  <div class="ma" style="margin-top:.75rem;"><button class="bcn" id="iclose">取消</button></div>
+</div></div>
+
+<!-- Settle Modal -->
+<div class="mbg" id="sm2" style="z-index:20;"><div class="mdl">
+  <h2>銷帳</h2><div id="sc3"></div>
+  <div class="ma"><button class="bcn" id="scnl">取消</button><button class="bde" id="sok">確認銷帳</button></div>
+</div></div>
+
+<!-- Member Modal -->
+<div class="mbg" id="mm2" style="z-index:20;"><div class="mdl">
+  <h2>管理成員</h2><div id="mml"></div>
+  <div class="car" style="margin-top:12px;"><input type="text" id="nm2" placeholder="新增成員姓名"/><button class="cab" id="amb">新增</button></div>
+  <div class="ma"><button class="bsv" id="mdone">完成</button></div>
+</div></div>
+
+<script>
+(function(){
+var IC=['🛒','🍜','🍕','🍺','☕','🏠','💡','🚿','🚗','🚌','✈','🎬','🎮','📚','💊','🏥','👕','💄','💰','💳','🐶','🌿','🎁','📱','🖥','🔧','🏋','🏫','🎵','🌟'];
+var MC=[{bg:'#E1F5EE',fc:'#0F6E56'},{bg:'#FBEAF0',fc:'#993556'},{bg:'#E6F1FB',fc:'#185FA5'},{bg:'#FAEEDA',fc:'#854F0B'},{bg:'#EEEDFE',fc:'#3C3489'}];
+var BC=['#1D9E75','#D4537E','#185FA5','#BA7517','#534AB7'];
+var DEFAULT_MBRS=[{n:'小明',c:0,b:0},{n:'小美',c:1,b:0}];
+var DEFAULT_CATS=[
+  {n:'餐飲',i:'🛒',s:['食材','外食','飲料']},
+  {n:'居家',i:'🏠',s:['房租','水電','日用品']},
+  {n:'交通',i:'🚗',s:['大眾運輸','油費','停車']},
+  {n:'娛樂',i:'🎬',s:['電影','遊戲','旅遊']},
+  {n:'醫療',i:'💊',s:['掛號','藥品']},
+  {n:'收入',i:'💰',s:['薪資','獎金','其他']},
+  {n:'其他',i:'🌟',s:[]}
+];
+
+function lsGet(key,def){try{var v=localStorage.getItem(key);return v?JSON.parse(v):def;}catch(e){return def;}}
+function lsSave(){try{localStorage.setItem('hb_mbrs',JSON.stringify(mbrs));localStorage.setItem('hb_cats',JSON.stringify(cats));localStorage.setItem('hb_recs',JSON.stringify(recs));localStorage.setItem('hb_slogs',JSON.stringify(slogs));}catch(e){console.warn('儲存失敗',e);}}
+function saveAll(){lsSave();if(window.cloudSave)window.cloudSave();}
+
+var mbrs=lsGet('hb_mbrs',DEFAULT_MBRS);
+var cats=lsGet('hb_cats',DEFAULT_CATS);
+var recs=lsGet('hb_recs',[]);
+var slogs=lsGet('hb_slogs',[]);
+var ctype='exp',csplit='none',ledit=null,eid=0,icix=null;
+
+function g(id){return document.getElementById(id);}
+function om(id){g(id).classList.add('open');}
+function cm(id){g(id).classList.remove('open');}
+function hl(t,q){if(!q||!t)return String(t||'');return String(t).replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>');}
+
+// tabs
+function showTab(n){
+  g('tov').style.display=n==='ov'?'block':'none';
+  g('tmb').style.display=n==='mb'?'block':'none';
+  g('tch').style.display=n==='ch'?'block':'none';
+  document.querySelectorAll('.tab').forEach(function(el,i){el.classList.toggle('active',['ov','mb','ch'][i]===n);});
+  if(n==='mb')rmbrs();
+}
+g('t0').onclick=function(){showTab('ov');};
+g('t1').onclick=function(){showTab('mb');};
+g('t2').onclick=function(){showTab('ch');};
+
+// summary
+function calcS(){
+  var inc=0,exp=0;recs.forEach(function(r){r.t==='inc'?inc+=r.v:exp+=r.v;});
+  g('si').textContent='$'+inc.toLocaleString();
+  g('se').textContent='$'+exp.toLocaleString();
+  g('sb').textContent='$'+(inc-exp).toLocaleString();
+}
+
+// search
+g('sq').addEventListener('input',function(){
+  var q=this.value.trim();g('scl').style.display=q?'block':'none';renderL(q);
+});
+g('scl').addEventListener('click',function(){g('sq').value='';this.style.display='none';renderL('');});
+
+// render list
+function renderL(q){
+  var sorted=[].concat(recs).sort(function(a,b){return b.d.localeCompare(a.d)||(b.id-a.id);});
+  var filt=sorted.filter(function(r){return !q||r.n.toLowerCase().includes(q.toLowerCase())||(r.no&&r.no.toLowerCase().includes(q.toLowerCase()));});
+  var el=g('txl');
+  if(!filt.length){el.innerHTML='<div class="emp">'+(q?'找不到「'+q+'」相關記錄':'尚無記錄')+'</div>';return;}
+  var grp={},ord=[];
+  filt.forEach(function(r){if(!grp[r.d]){grp[r.d]=[];ord.push(r.d);}grp[r.d].push(r);});
+  var h=q?'<div class="sti">搜尋結果（'+filt.length+'筆）</div>':'';
+  ord.forEach(function(dt){
+    var d=new Date(dt+'T00:00:00');
+    h+='<div class="dg"><div class="dl">'+d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日（'+'日一二三四五六'.charAt(d.getDay())+'）</div>';
+    grp[dt].forEach(function(r){
+      var ac=r.t==='inc'?'#1D9E75':'#D85A30',as=r.t==='inc'?'+':'-';
+      var sb2=r.sp==='equal'?'<span class="sbdg">平分</span>':r.sp==='custom'?'<span class="sbdg">各別</span>':'';
+      var stag=r.s?'<span class="tgs">'+hl(r.s,q)+'</span>':'';
+      h+='<div class="tx" data-id="'+r.id+'">'+
+        '<div class="txi" style="background:'+(r.t==='inc'?'#EAF3DE':'#E6F1FB')+'">'+r.i+'</div>'+
+        '<div class="txi2"><div class="txn">'+hl(r.n,q)+'</div>'+
+        '<div class="txg"><span class="tgm">'+r.i+' '+hl(r.c,q)+'</span>'+stag+'</div>'+
+        '<div class="txm">'+r.p+(r.no?' · '+hl(r.no,q):'')+'</div></div>'+
+        '<div class="txr"><div class="txa" style="color:'+ac+'">'+as+'$'+r.v.toLocaleString()+'</div><div class="txp">'+sb2+'</div></div>'+
+      '</div>';
+    });
+    h+='</div>';
+  });
+  el.innerHTML=h;
+  el.querySelectorAll('.tx').forEach(function(e){
+    e.addEventListener('click',function(){openR(parseInt(this.getAttribute('data-id')));});
+  });
+}
+
+// open record modal
+g('addbtn').addEventListener('click',function(){openR(0);});
+
+function openR(id){
+  eid=id;
+  g('rmt').textContent=id?'編輯記錄':'新增記錄';
+  bldPay();bldCat();bldSplitOpts();
+  var ma=g('rma');ma.innerHTML='';
+  if(id){var bd=document.createElement('button');bd.className='bde';bd.textContent='刪除';bd.addEventListener('click',delR);ma.appendChild(bd);}
+  var bc=document.createElement('button');bc.className='bcn';bc.textContent='取消';bc.addEventListener('click',function(){cm('rm');});ma.appendChild(bc);
+  var bs=document.createElement('button');bs.className='bsv';bs.textContent='儲存';bs.addEventListener('click',saveR);ma.appendChild(bs);
+
+  if(id){
+    var r=recs.find(function(x){return x.id===id;});
+    if(!r)return;
+    ctype=r.t;csplit=r.sp;ledit=null;
+    g('fd').value=r.d;g('fn').value=r.n;g('ft').value=r.v;g('fno').value=r.no||'';
+    applyType(r.t);
+    var ci=cats.findIndex(function(c){return c.n===r.c;});
+    if(ci>=0)g('fc').selectedIndex=ci;bldSub();
+    if(r.s){var si2=cats[ci]&&cats[ci].s.indexOf(r.s);if(si2>=0)g('fs').selectedIndex=si2;}
+    var pi=mbrs.findIndex(function(m){return m.n===r.p;});
+    if(pi>=0)g('fp').selectedIndex=pi;
+    g('spl').querySelectorAll('.so').forEach(function(o,i){o.classList.toggle('active',['none','equal','custom'][i]===r.sp);});
+    g('csp').style.display=r.sp==='custom'?'block':'none';
+  }else{
+    ctype='exp';csplit='none';ledit=null;
+    g('fd').value=new Date().toISOString().slice(0,10);
+    g('fn').value='';g('ft').value='';g('fno').value='';
+    applyType('exp');
+    g('spl').querySelectorAll('.so').forEach(function(o,i){o.classList.toggle('active',i===0);});
+    g('csp').style.display='none';
+  }
+  bldCust();updPD();om('rm');
+}
+
+function delR(){
+  if(!eid)return;
+  recs=recs.filter(function(r){return r.id!==eid;});
+  saveAll();cm('rm');renderL(g('sq').value.trim());calcS();
+}
+
+function applyType(t){
+  ctype=t;
+  g('bexp').className='tb'+(t==='exp'?' ae':'');
+  g('binc').className='tb'+(t==='inc'?' ai':'');
+  g('spf').style.display=t==='inc'?'none':'block';
+  g('csp').style.display='none';
+  g('pdf').style.display=t==='inc'?'none':'block';
+  updPD();
+}
+g('bexp').addEventListener('click',function(){applyType('exp');});
+g('binc').addEventListener('click',function(){applyType('inc');});
+
+function bldPay(){var s=g('fp');s.innerHTML='';mbrs.forEach(function(m){var o=document.createElement('option');o.value=m.n;o.textContent=m.n;s.appendChild(o);});}
+function bldCat(){var s=g('fc');s.innerHTML='';cats.forEach(function(c){var o=document.createElement('option');o.value=c.n;o.textContent=c.i+' '+c.n;s.appendChild(o);});bldSub();}
+function bldSub(){
+  var idx=g('fc').selectedIndex,cat=cats[idx];
+  var sf=g('sff'),ss=g('fs');ss.innerHTML='';
+  if(cat&&cat.s.length){sf.style.display='block';cat.s.forEach(function(sv){var o=document.createElement('option');o.textContent=sv;ss.appendChild(o);});}
+  else sf.style.display='none';
+}
+g('fc').addEventListener('change',bldSub);
+g('fp').addEventListener('change',updPD);
+g('ft').addEventListener('input',function(){if(csplit==='custom'&&ledit!==null)custCh(ledit);else updPD();});
+
+function bldSplitOpts(){
+  var c=g('spl');c.innerHTML='';
+  ['不分帳','平分','各別金額'].forEach(function(lbl,i){
+    var d=document.createElement('div');d.className='so'+(i===0?' active':'');d.textContent=lbl;
+    d.addEventListener('click',function(){
+      c.querySelectorAll('.so').forEach(function(o){o.classList.remove('active');});
+      d.classList.add('active');
+      csplit=['none','equal','custom'][i];ledit=null;
+      g('csp').style.display=csplit==='custom'?'block':'none';
+      if(csplit!=='custom')mbrs.forEach(function(_,j){var e=g('ci'+j);if(e)e.value='';});
+      updPD();
+    });
+    c.appendChild(d);
+  });
+}
+
+function bldCust(){
+  var c=g('csr');c.innerHTML='';
+  mbrs.forEach(function(m,i){
+    var rw=document.createElement('div');rw.className='srw';
+    var sp=document.createElement('span');sp.className='snm';sp.textContent=m.n;
+    var inp=document.createElement('input');inp.type='number';inp.id='ci'+i;inp.placeholder='0';inp.style.flex='1';
+    inp.style.padding='8px 10px';inp.style.background='var(--sf)';inp.style.border='.5px solid var(--bd)';
+    inp.style.borderRadius='var(--rad)';inp.style.fontSize='14px';inp.style.color='var(--tx)';
+    (function(idx){inp.addEventListener('input',function(){custCh(idx);});})(i);
+    rw.appendChild(sp);rw.appendChild(inp);c.appendChild(rw);
+  });
+}
+
+function getV(){return parseFloat(g('ft').value)||0;}
+function custCh(idx){
+  ledit=idx;var tot=getV();
+  if(mbrs.length===2){var oth=1-idx,me=parseFloat(g('ci'+idx).value)||0;var oe=g('ci'+oth);if(oe)oe.value=Math.max(0,tot-me)||'';g('sh').textContent=mbrs[oth].n+'的金額已自動帶入';}
+  updPD();
+}
+function updPD(){
+  var tot=getV(),grid=g('pdg');grid.innerHTML='';
+  if(ctype==='inc'){grid.innerHTML='<div style="font-size:12px;color:var(--tx3);">收入直接計入家庭帳戶</div>';return;}
+  var am={};mbrs.forEach(function(m){am[m.n]=0;});
+  var pn=g('fp')&&g('fp').value;
+  if(csplit==='none'){if(pn)am[pn]=tot;}
+  else if(csplit==='equal'){var e=Math.round(tot/mbrs.length);mbrs.forEach(function(m,i){am[m.n]=i===mbrs.length-1?tot-(mbrs.length-1)*e:e;});}
+  else{mbrs.forEach(function(m,i){var el=g('ci'+i);am[m.n]=el?parseFloat(el.value)||0:0;});}
+  mbrs.forEach(function(m){var pb=document.createElement('div');pb.className='pbl';pb.innerHTML='<div class="pb1">'+m.n+' 應付</div><div class="pb2">$'+am[m.n].toLocaleString()+'</div>';grid.appendChild(pb);});
+}
+
+function saveR(){
+  var name=g('fn').value.trim(),tot=parseFloat(g('ft').value)||0;
+  if(!name){alert('請填寫名稱');return;}
+  if(!tot){alert('請填寫金額');return;}
+  var ci=g('fc').selectedIndex,cat=cats[ci];
+  if(!cat){alert('請選擇類別');return;}
+  var se=g('fs'),sub=se&&se.options.length?se.value:'';
+  var obj={t:ctype,n:name,d:g('fd').value,v:tot,c:cat.n,i:cat.i,s:sub,p:g('fp').value,sp:csplit,no:g('fno').value.trim()};
+  if(eid){var idx=recs.findIndex(function(r){return r.id===eid;});if(idx>=0){obj.id=eid;recs[idx]=obj;}}
+  else{obj.id=Date.now();recs.unshift(obj);}
+  saveAll();cm('rm');renderL(g('sq').value.trim());calcS();
+}
+
+// cat modal
+g('clink').addEventListener('click',function(){rndCL();om('cm2');});
+g('cdone').addEventListener('click',function(){saveAll();cm('cm2');bldCat();});
+function rndCL(){
+  var el=g('cl');el.innerHTML='';
+  cats.forEach(function(c,ci){
+    var sec=document.createElement('div');sec.className='cse';
+    var cli=document.createElement('div');cli.className='cli';
+    var ll=document.createElement('div');ll.className='cll';
+    var ico=document.createElement('span');ico.textContent=c.i;ico.style.cssText='cursor:pointer;font-size:18px;';
+    ico.addEventListener('click',(function(i){return function(){openIM(i);};})(ci));
+    var nm=document.createElement('span');nm.textContent=c.n;
+    var ht=document.createElement('span');ht.textContent='(點圖示換)';ht.style.cssText='font-size:11px;color:var(--tx3);margin-left:4px;';
+    ll.appendChild(ico);ll.appendChild(nm);ll.appendChild(ht);
+    var db=document.createElement('button');db.className='cdl';db.innerHTML='&times;';
+    db.addEventListener('click',(function(i){return function(){cats.splice(i,1);rndCL();};})(ci));
+    cli.appendChild(ll);cli.appendChild(db);sec.appendChild(cli);
+    var sl=document.createElement('div');sl.className='sbl';
+    c.s.forEach(function(sv,si){
+      var row=document.createElement('div');row.className='sbi';
+      var sp=document.createElement('span');sp.style.cssText='font-size:13px;color:var(--tx2);';sp.textContent='› '+sv;
+      var sb3=document.createElement('button');sb3.className='sbd';sb3.innerHTML='&times;';
+      sb3.addEventListener('click',(function(ci2,si2){return function(){cats[ci2].s.splice(si2,1);rndCL();};})(ci,si));
+      row.appendChild(sp);row.appendChild(sb3);sl.appendChild(row);
+    });
+    var ar=document.createElement('div');ar.className='car';
+    var inp=document.createElement('input');inp.type='text';inp.placeholder='新增子類別';inp.id='sai'+ci;
+    var ab=document.createElement('button');ab.className='cab';ab.textContent='新增';
+    ab.addEventListener('click',(function(i){return function(){var v=g('sai'+i).value.trim();if(!v)return;cats[i].s.push(v);rndCL();};})(ci));
+    ar.appendChild(inp);ar.appendChild(ab);sl.appendChild(ar);
+    sec.appendChild(sl);el.appendChild(sec);
+  });
+  var ar2=document.createElement('div');ar2.className='car';ar2.style.marginTop='10px';
+  var ni=document.createElement('input');ni.type='text';ni.placeholder='新增主類別';ni.id='nci2';
+  var nb=document.createElement('button');nb.className='cab';nb.textContent='新增';
+  nb.addEventListener('click',function(){var v=g('nci2').value.trim();if(!v)return;cats.push({n:v,i:'🌟',s:[]});rndCL();});
+  ar2.appendChild(ni);ar2.appendChild(nb);el.appendChild(ar2);
+}
+
+// icon modal
+g('iclose').addEventListener('click',function(){cm('im2');});
+function openIM(ci){
+  icix=ci;var gd=g('ig');gd.innerHTML='';
+  IC.forEach(function(ic){
+    var d=document.createElement('div');d.className='iop'+(cats[ci].i===ic?' isel':'');d.textContent=ic;
+    d.addEventListener('click',(function(ico,i){return function(){cats[i].i=ico;cm('im2');rndCL();};})(ic,ci));
+    gd.appendChild(d);
+  });
+  om('im2');
+}
+
+// member modal
+g('mgm').addEventListener('click',function(){rndML();om('mm2');});
+g('mdone').addEventListener('click',function(){saveAll();cm('mm2');rmbrs();});
+g('amb').addEventListener('click',function(){var v=g('nm2').value.trim();if(!v)return;mbrs.push({n:v,c:mbrs.length%MC.length,b:0});g('nm2').value='';rndML();});
+function rndML(){
+  var el=g('mml');el.innerHTML='';
+  mbrs.forEach(function(m,i){
+    var c=MC[m.c%MC.length],row=document.createElement('div');row.className='mer';
+    var av=document.createElement('div');av.className='av';av.style.cssText='background:'+c.bg+';color:'+c.fc+';width:28px;height:28px;font-size:11px;';av.textContent=m.n.charAt(0);
+    var inp=document.createElement('input');inp.type='text';inp.value=m.n;
+    inp.addEventListener('input',(function(i2){return function(){var v=this.value.trim();if(v)mbrs[i2].n=v;};})(i));
+    var db=document.createElement('button');db.className='med';db.innerHTML='&times;';
+    db.addEventListener('click',(function(i2){return function(){if(mbrs.length<=1){alert('至少需要一位成員');return;}mbrs.splice(i2,1);rndML();};})(i));
+    row.appendChild(av);row.appendChild(inp);row.appendChild(db);el.appendChild(row);
+  });
+}
+
+// members
+function rmbrs(){
+  var el=g('ml');el.innerHTML='';
+  var ok=mbrs.every(function(m){return m.b===0;});
+  mbrs.forEach(function(m,i){
+    var c=MC[m.c%MC.length],row=document.createElement('div');row.className='mcd';
+    var ac=m.b>=0?'#1D9E75':'#D85A30',al=(m.b>=0?'應收':'應付')+' $'+Math.abs(m.b).toLocaleString();
+    var ml2=document.createElement('div');ml2.className='mrw';
+    var av=document.createElement('div');av.className='av';av.style.cssText='background:'+c.bg+';color:'+c.fc+';';av.textContent=m.n.charAt(0);
+    var nm=document.createElement('span');nm.style.cssText='font-size:13px;color:var(--tx);';nm.textContent=m.n;
+    ml2.appendChild(av);ml2.appendChild(nm);
+    var rr=document.createElement('div');rr.style.cssText='display:flex;align-items:center;gap:8px;';
+    var as2=document.createElement('span');as2.style.cssText='font-size:13px;color:'+ac+';';as2.textContent=al;
+    rr.appendChild(as2);
+    if(ok){var bd2=document.createElement('span');bd2.className='stn';bd2.textContent='已結清';rr.appendChild(bd2);}
+    else{var sb4=document.createElement('button');sb4.className='stb';sb4.textContent='銷帳';sb4.addEventListener('click',(function(i2){return function(){openSM(i2);};})(i));rr.appendChild(sb4);}
+    row.appendChild(ml2);row.appendChild(rr);el.appendChild(row);
+  });
+  var deb=mbrs.find(function(m){return m.b<0;}),cr=mbrs.find(function(m){return m.b>0;});
+  g('ms').innerHTML=(!deb||!cr)?'<div style="font-size:13px;color:#1D9E75;font-weight:500;">本月已全數結清 ✓</div>':
+    '<div style="font-size:12px;color:var(--tx3);margin-bottom:4px;">建議結算</div><div style="font-size:14px;color:var(--tx);font-weight:500;">'+deb.n+' 轉帳 $'+Math.abs(deb.b).toLocaleString()+' 給 '+cr.n+'</div>';
+  rContribs();rSLogs();
+}
+
+function rContribs(){
+  var co={};mbrs.forEach(function(m){co[m.n]=0;});
+  recs.forEach(function(r){if(r.t==='inc'&&co[r.p]!==undefined)co[r.p]+=r.v;});
+  var tot=mbrs.reduce(function(a,m){return a+(co[m.n]||0);},0);
+  var el=g('cb');
+  if(!tot){el.innerHTML='<div style="font-size:13px;color:var(--tx3);">尚無收入記錄</div>';return;}
+  el.innerHTML='';
+  mbrs.forEach(function(m,i){
+    var amt=co[m.n]||0,pct=Math.round(amt/tot*100),c=MC[m.c%MC.length];
+    var rw=document.createElement('div');rw.className='crw';
+    rw.innerHTML='<div class="cnm"><div class="av" style="width:20px;height:20px;font-size:10px;background:'+c.bg+';color:'+c.fc+';">'+m.n.charAt(0)+'</div>'+m.n+'</div>'+
+      '<div class="cbr"><div class="cbf" style="width:'+pct+'%;background:'+BC[i%BC.length]+';"></div></div>'+
+      '<div class="cam">$'+amt.toLocaleString()+'</div>';
+    el.appendChild(rw);
+  });
+  var ft=document.createElement('div');ft.style.cssText='font-size:11px;color:var(--tx3);margin-top:6px;padding-top:6px;border-top:.5px solid var(--bd);';
+  ft.textContent='合計：$'+tot.toLocaleString();el.appendChild(ft);
+}
+
+// settle
+g('scnl').addEventListener('click',function(){cm('sm2');});
+g('sok').addEventListener('click',function(){
+  var sd=g('sda');if(!sd)return;
+  var dv=sd.value.split('-');var fi=parseInt(dv[0]),ti=parseInt(dv[1]);
+  var amt=parseFloat(g('saa').value)||0;
+  var note=g('sna').value||'';
+  var ded=g('sdda')&&g('sdda').checked;
+  mbrs[fi].b+=amt;mbrs[ti].b-=amt;
+  var d=new Date();
+  slogs.unshift({f:mbrs[fi].n,to:mbrs[ti].n,amt:amt,dt:(d.getMonth()+1)+'月'+d.getDate()+'日',no:note,ded:ded});
+  saveAll();cm('sm2');rmbrs();
+});
+
+function openSM(idx){
+  var deb=mbrs.find(function(m){return m.b<0;}),def=deb?Math.abs(deb.b):0;
+  var cont=g('sc3');cont.innerHTML='';
+  // direction
+  var df=document.createElement('div');df.className='fl';
+  var dl=document.createElement('label');dl.textContent='銷帳方向';df.appendChild(dl);
+  var ds=document.createElement('select');ds.id='sda';
+  ds.style.cssText='width:100%;padding:9px 12px;background:var(--sf2);border:.5px solid var(--bd);border-radius:var(--rad);font-size:14px;color:var(--tx);';
+  mbrs.forEach(function(a,i){mbrs.forEach(function(b,j){if(i!==j){var o=document.createElement('option');o.value=i+'-'+j;o.textContent=a.n+' → '+b.n;ds.appendChild(o);}});});
+  df.appendChild(ds);cont.appendChild(df);
+  // amount
+  var af=document.createElement('div');af.className='fl';
+  var al=document.createElement('label');al.textContent='銷帳金額（NTD）';af.appendChild(al);
+  var ai=document.createElement('input');ai.type='number';ai.id='saa';ai.value=def;
+  ai.style.cssText='width:100%;padding:9px 12px;background:var(--sf2);border:.5px solid var(--bd);border-radius:var(--rad);font-size:14px;color:var(--tx);';
+  af.appendChild(ai);cont.appendChild(af);
+  // deduct
+  var db=document.createElement('div');
+  db.style.cssText='background:var(--sf2);border-radius:var(--rad);padding:.75rem;margin-bottom:.75rem;';
+  db.innerHTML='<div style="font-size:11px;color:var(--tx3);margin-bottom:6px;font-weight:600;">從家庭帳戶內扣</div>'+
+    '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;">'+
+    '<input type="checkbox" id="sdda" style="width:auto;cursor:pointer;"/>'+
+    '<span style="font-size:13px;color:var(--tx);">從家庭帳戶直接扣除（不需額外轉帳）</span></label>'+
+    '<div id="sddi" style="display:none;font-size:12px;color:var(--blue);margin-top:6px;">將從家庭帳戶餘額扣除銷帳</div>';
+  cont.appendChild(db);
+  setTimeout(function(){var ck=g('sdda');if(ck)ck.addEventListener('change',function(){var si2=g('sddi');if(si2)si2.style.display=this.checked?'block':'none';});},30);
+  // note
+  var nf=document.createElement('div');nf.className='fl';
+  var nl=document.createElement('label');nl.textContent='備註';nf.appendChild(nl);
+  var ni=document.createElement('input');ni.type='text';ni.id='sna';ni.placeholder='例：4月轉帳';
+  ni.style.cssText='width:100%;padding:9px 12px;background:var(--sf2);border:.5px solid var(--bd);border-radius:var(--rad);font-size:14px;color:var(--tx);';
+  nf.appendChild(ni);cont.appendChild(nf);
+  om('sm2');
+}
+
+function rSLogs(){
+  var sec=g('sls'),list=g('sll');
+  if(!slogs.length){sec.style.display='none';return;}
+  sec.style.display='block';list.innerHTML='';
+  slogs.forEach(function(l,i){
+    var row=document.createElement('div');row.className='slg';
+    var dt2=l.ded?'<span style="font-size:10px;background:var(--blu2);color:var(--blue);border-radius:4px;padding:1px 5px;margin-left:4px;font-weight:500;">帳戶內扣</span>':'';
+    var tx=document.createElement('span');tx.innerHTML=l.dt+' '+l.f+' → '+l.to+' <strong>$'+l.amt.toLocaleString()+'</strong>'+(l.no?' ('+l.no+')'  :'')+dt2;
+    var ub=document.createElement('button');ub.className='sud';ub.textContent='撤銷';
+    ub.addEventListener('click',(function(i2){return function(){
+      var ll=slogs[i2];
+      var fi=mbrs.findIndex(function(m){return m.n===ll.f;}),ti2=mbrs.findIndex(function(m){return m.n===ll.to;});
+      if(fi>=0)mbrs[fi].b-=ll.amt;if(ti2>=0)mbrs[ti2].b+=ll.amt;
+      slogs.splice(i2,1);saveAll();rmbrs();
+    };})(i));
+    row.appendChild(tx);row.appendChild(ub);list.appendChild(row);
+  });
+}
+
+// backdrop close
+['rm','cm2','im2','sm2','mm2'].forEach(function(id){
+  g(id).addEventListener('click',function(e){if(e.target===this)cm(id);});
+});
+
+// export / import
+g('expbtn').addEventListener('click',function(){
+  var data=JSON.stringify({mbrs:mbrs,cats:cats,recs:recs,slogs:slogs},null,2);
+  var a=document.createElement('a');
+  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(data);
+  a.download='家庭帳目備份_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+});
+g('impfile').addEventListener('change',function(){
+  var file=this.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var d=JSON.parse(e.target.result);
+      if(d.recs&&d.mbrs&&d.cats){
+        if(!confirm('確定要匯入？這會覆蓋目前所有資料。'))return;
+        mbrs=d.mbrs;cats=d.cats;recs=d.recs;slogs=d.slogs||[];
+        lsSave();bldCat();calcS();renderL('');alert('匯入成功！');
+      } else {alert('檔案格式不正確');}
+    }catch(err){alert('匯入失敗：'+err.message);}
+  };
+  reader.readAsText(file);
+  this.value='';
+});
+
+calcS();renderL('');
+})();
+</script>
+<!-- ════ Firebase SDK ════ -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ╔══════════════════════════════════════════╗
+// ║  把你的 Firebase 設定貼在這裡           ║
+// ╚══════════════════════════════════════════╝
+const firebaseConfig = {
+  apiKey: "AIzaSyDXf6CzBGAORkKwAmqTiKUQQqFxDhtUZXQ",
+  authDomain: "family-budget-b838a.firebaseapp.com",
+  projectId: "family-budget-b838a",
+  storageBucket: "family-budget-b838a.firebasestorage.app",
+  messagingSenderId: "98065703680",
+  appId: "1:98065703680:web:ef018ce6a88507455949e5",
+  measurementId: "G-9W4ESS3PFP"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const DOC = doc(db, 'budget', 'data');
+
+// 顯示同步狀態
+function setSyncStatus(status) {
+  var el = document.getElementById('syncstatus');
+  if (!el) return;
+  var map = { saving: '⏳ 同步中...', saved: '✅ 已同步', error: '❌ 同步失敗', loading: '🔄 載入中...' };
+  el.textContent = map[status] || '';
+}
+
+// 儲存到 Firestore
+window.cloudSave = async function() {
+  try {
+    setSyncStatus('saving');
+    await setDoc(DOC, {
+      mbrs: JSON.stringify(mbrs),
+      cats: JSON.stringify(cats),
+      recs: JSON.stringify(recs),
+      slogs: JSON.stringify(slogs),
+      updatedAt: Date.now()
+    });
+    setSyncStatus('saved');
+  } catch(e) {
+    console.error(e);
+    setSyncStatus('error');
+    // 備援：存到 localStorage
+    lsSave();
+  }
+};
+
+// 即時監聽雲端資料變化（其他裝置更新時自動同步）
+setSyncStatus('loading');
+onSnapshot(DOC, function(snap) {
+  if (!snap.exists()) { setSyncStatus('saved'); return; }
+  var d = snap.data();
+  try {
+    var newRecs = JSON.parse(d.recs || '[]');
+    var newMbrs = JSON.parse(d.mbrs || '[]');
+    var newCats = JSON.parse(d.cats || '[]');
+    var newSlogs = JSON.parse(d.slogs || '[]');
+    if (JSON.stringify(recs) !== JSON.stringify(newRecs) ||
+        JSON.stringify(mbrs) !== JSON.stringify(newMbrs)) {
+      recs = newRecs; mbrs = newMbrs; cats = newCats; slogs = newSlogs;
+      lsSave();
+      bldCat(); calcS(); renderL(document.getElementById('sq').value.trim());
+    }
+    setSyncStatus('saved');
+  } catch(e) { setSyncStatus('error'); }
+});
+</script>
+</body>
+</html>
